@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package pb;
+
+service Share {
+  rpc Gen (GenRequest) returns (ServiceResponse) {
+  }
+  rpc BatchGen (BatchGenRequest) returns (ServiceResponse) {
+  }
+  rpc Expires (ExpiresRequest) returns (ServiceResponse) {}
+}
+
+message ExpiresRequest {
+  string code = 1;
+  int64 extendTime = 2;
+}
+
+message BatchGenRequest {
+  string name = 1;
+  string bucket = 2;
+  repeated string targetPath = 3;
+  int64 validTime = 4;
+  string sharer = 5;
+  bool public = 6;
+}
+
+message GenRequest {
+  string name = 1;
+  string bucket = 2;
+  string targetPath = 3;
+  int64 validTime = 4;
+  string sharer = 5;
+  bool public = 6;
+}
+
+message ServiceResponse {
+  bool success = 1;
+  int64 code = 2;
+  string data = 3;
+  string message = 4;
+}
