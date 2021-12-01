@@ -90,6 +90,7 @@ func (s *httpClient) Gen(ctx context.Context, name, bucket, targetPath, sharer s
 
 	var rs genResult
 	err = request.NewRequest(fmt.Sprintf("%s%s", s.host, "/share/gen"), http.MethodPost).
+		HttpClient(s.client).
 		Param("accessKey", s.accessKey).
 		Param("sign", sign).
 		Param("timestamp", strconv.Itoa(int(timestamp))).
@@ -128,6 +129,7 @@ func (s *httpClient) GenBatch(ctx context.Context, name, bucket string, targetPa
 
 	var rs batchGenResult
 	err = request.NewRequest(fmt.Sprintf("%s%s", s.host, "/share/batch/gen"), http.MethodPost).
+		HttpClient(s.client).
 		Param("accessKey", s.accessKey).
 		Param("sign", sign).
 		Param("timestamp", strconv.Itoa(int(timestamp))).
@@ -159,6 +161,7 @@ func (s *httpClient) ExpiresTime(ctx context.Context, code string, expireTime ti
 
 	var rs genResult
 	err = request.NewRequest(fmt.Sprintf("%s/share/expires/%s", s.host, code), http.MethodPut).
+		HttpClient(s.client).
 		Param("accessKey", s.accessKey).
 		Param("sign", sign).
 		Param("timestamp", strconv.Itoa(int(timestamp))).
