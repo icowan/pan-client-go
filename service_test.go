@@ -29,6 +29,7 @@ func initHTTPClient() (svc Service, err error) {
 		nil,
 	)
 }
+
 func TestGrpcClient_Gen(t *testing.T) {
 	client, err := initGRPCClient()
 	if err != nil {
@@ -125,5 +126,20 @@ func TestHttpClient_GenBatch(t *testing.T) {
 
 	for _, v := range gen {
 		t.Log(v.Ref, v.URL)
+	}
+}
+
+func TestHttpClient_ExpiresTime(t *testing.T) {
+	client, err := initHTTPClient()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	tm := time.Unix(time.Now().Unix()+3600, 0)
+	ctx := context.Background()
+	err = client.ExpiresTime(ctx, "9fdPFCtnRyXI", tm)
+	if err != nil {
+		t.Error(err)
+		return
 	}
 }

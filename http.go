@@ -11,6 +11,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/kplcloud/request"
 	"math/rand"
@@ -52,6 +53,12 @@ type batchGenRequest struct {
 	ValidTime  int64    `json:"validTime"` // 分钟
 	Sharer     string   `json:"sharer" valid:"required"`
 	Public     bool     `json:"public"`
+}
+
+type expiresRequest struct {
+	Code       string `json:"code,omitempty"`
+	ExtendTime int64  `json:"extendTime,omitempty"`
+	Name       string `json:"name"`
 }
 
 type httpClient struct {
@@ -137,7 +144,37 @@ func (s *httpClient) GenBatch(ctx context.Context, name, bucket string, targetPa
 }
 
 func (s *httpClient) ExpiresTime(ctx context.Context, code string, expireTime time.Time) (err error) {
-	panic("implement me")
+	timestamp := time.Now().Unix()
+	nonce := rand.Int()
+	validTime := (expireTime.Unix() - time.Now().Unix()) * 60 // *60秒
+	req := expiresRequest{
+		Code:       code,
+		ExtendTime: validTime,
+	}
+	var data map[string]interface{}
+	b, _ := json.Marshal(req)
+	_ = json.Unmarshal(b, &data)
+
+	sign := encodeSign(s.accessKey, s.secretKey, fmt.Sprintf("%s:%d:%d", EncodeData(data), timestamp, nonce))
+
+	var rs genResult
+	err = request.NewRequest(fmt.Sprintf("%s/share/expires/%s", s.host, code), http.MethodPut).
+		Param("accessKey", s.accessKey).
+		Param("sign", sign).
+		Param("timestamp", strconv.Itoa(int(timestamp))).
+		Param("nonce", strconv.Itoa(nonce)).
+		Header("ContentType", "application/json").
+		Body(b).
+		Do().Into(&rs)
+	if err != nil {
+		return
+	}
+
+	if !rs.Success {
+		return errors.New(fmt.Sprintf("msg: %s, traceId: %s", rs.Message, rs.TraceId))
+	}
+
+	return
 }
 
 func (s *httpClient) Close(ctx context.Context) (err error) {
