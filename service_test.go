@@ -37,6 +37,9 @@ func TestGrpcClient_Gen(t *testing.T) {
 		return
 	}
 	ctx := context.Background()
+	defer func() {
+		_ = client.Close(ctx)
+	}()
 	tm := time.Unix(time.Now().Unix()+3600, 0)
 	gen, err := client.Gen(ctx, "projectName", "bucket", "03.pdf", "test", &tm)
 	if err != nil {
@@ -44,7 +47,7 @@ func TestGrpcClient_Gen(t *testing.T) {
 		return
 	}
 	t.Log(gen.URL)
-	_ = client.Close(ctx)
+
 }
 
 func TestGrpcClient_GenBatch(t *testing.T) {
@@ -55,7 +58,9 @@ func TestGrpcClient_GenBatch(t *testing.T) {
 	}
 
 	ctx := context.Background()
-
+	defer func() {
+		_ = client.Close(ctx)
+	}()
 	tm := time.Unix(time.Now().Unix()+3600, 0)
 	gen, err := client.GenBatch(ctx, "projectName", "bucket", []string{
 		"03.pdf",
@@ -68,8 +73,6 @@ func TestGrpcClient_GenBatch(t *testing.T) {
 	for _, v := range gen {
 		t.Log(v.Ref, v.URL)
 	}
-
-	_ = client.Close(ctx)
 }
 
 func TestGrpcClient_ExpiresTime(t *testing.T) {
@@ -80,14 +83,15 @@ func TestGrpcClient_ExpiresTime(t *testing.T) {
 	}
 
 	ctx := context.Background()
-
+	defer func() {
+		_ = client.Close(ctx)
+	}()
 	tm := time.Unix(time.Now().Unix()+60, 0)
 	err = client.ExpiresTime(ctx, "9fdPFCtnRyXI", tm)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	_ = client.Close(ctx)
 }
 
 func TestHttpClient_Gen(t *testing.T) {
