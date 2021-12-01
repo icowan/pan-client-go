@@ -29,10 +29,17 @@ type GenResult struct {
 
 type Service interface {
 	// Gen 获取短链接
+	// name: 项目名可不填
+	// bucket: bucket
+	// targetPath: 文件路径
+	// share: 分享人, 可不填
+	// expireTime: 过期时间
 	Gen(ctx context.Context, name, bucket, targetPath, sharer string, expireTime *time.Time) (res GenResult, err error)
 	// GenBatch 批量生成短链接
+	// 与上面Gen方法一样，只是targetPath传多个文件路径
 	GenBatch(ctx context.Context, name, bucket string, targetPath []string, sharer string, expireTime *time.Time) (res []GenResult, err error)
 	// ExpiresTime 更新过期时间
+	// code: 生成链接返回给你的那个Code
 	ExpiresTime(ctx context.Context, code string, expireTime time.Time) (err error)
 	// Close 关闭连接
 	Close(ctx context.Context) (err error)
@@ -55,10 +62,6 @@ func encodeI(i interface{}, parentKey string, values url.Values) {
 		values.Add(parentKey, strconv.FormatBool(t))
 	case float64:
 		values.Add(parentKey, strconv.FormatFloat(t, 'g', 10, 64))
-	//case []string:
-	//	for index, value := range t {
-	//		values.Add(sliceKey(parentKey, index), value)
-	//	}
 	case []interface{}:
 		for index, v := range t {
 			encodeI(v, sliceKey(parentKey, index), values)
