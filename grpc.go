@@ -33,7 +33,7 @@ func (s *grpcClient) Gen(ctx context.Context, name, bucket, targetPath, sharer s
 		t := time.Now()
 		expireTime = &t
 	}
-	validTime := (expireTime.Unix() - time.Now().Unix()) * 60 // *60秒
+	validTime := (expireTime.Unix() - time.Now().Unix()) / 60 // *60秒
 
 	req := pb.GenRequest{
 		Name:       name,
